@@ -4,6 +4,23 @@
     modified
     SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 -->
+<PreferenceCategory
+        android:key="category_smart_home"
+        android:title="@string/category_smart_home">
+
+        <EditTextPreference
+            android:key="webhook_url"
+            android:title="@string/pref_webhook_url_title"
+            android:summary="@string/pref_webhook_url_summary"
+            android:inputType="textUri"
+            android:singleLine="true" />
+
+        <Preference
+            android:key="test_webhook"
+            android:title="@string/pref_test_webhook_title"
+            android:summary="@string/pref_test_webhook_summary" />
+
+    </PreferenceCategory>
 
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
