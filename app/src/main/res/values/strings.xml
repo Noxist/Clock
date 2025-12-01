@@ -1516,4 +1516,11 @@
     <string name="pref_test_webhook_summary">Klicken, um den Webhook jetzt auszulösen</string>
     <string name="webhook_success">Webhook erfolgreich gesendet!</string>
     <string name="webhook_failed">Fehler beim Senden des Webhooks.</string>
+    <string name="category_smart_home">Smart Home Integration</string>
+    <string name="pref_webhook_url_title">Home Assistant Webhook URL</string>
+    <string name="pref_webhook_url_summary">URL wird aufgerufen, wenn der Wecker klingelt</string>
+    <string name="pref_test_webhook_title">Webhook testen</string>
+    <string name="pref_test_webhook_summary">Klicken, um den Webhook jetzt auszulösen</string>
+    <string name="webhook_success">Webhook erfolgreich gesendet!</string>
+    <string name="webhook_failed">Fehler beim Senden des Webhooks.</string>
 </resources>
