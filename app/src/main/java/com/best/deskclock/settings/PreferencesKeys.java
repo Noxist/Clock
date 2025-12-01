@@ -10,6 +10,8 @@ public class PreferencesKeys {
 
     // Settings
     public static final String KEY_PERMISSION_MESSAGE = "key_permission_message";
+    // NEU: Konstante für die Webhook URL
+    public static final String KEY_WEBHOOK_URL = "webhook_url"; 
     public static final String KEY_ESSENTIAL_PERMISSIONS_GRANTED = "key_essential_permissions_granted";
     public static final String KEY_INTERFACE_CUSTOMIZATION = "key_interface_customization";
     public static final String KEY_CLOCK_SETTINGS = "key_clock_settings";
