@@ -35,10 +35,13 @@ import com.best.deskclock.R;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.events.Events;
 import com.best.deskclock.provider.AlarmInstance;
+import com.best.deskclock.settings.PreferencesKeys; // NEU: Importiere PreferencesKeys
 import com.best.deskclock.utils.AlarmUtils;
 import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.SdkUtils;
 
+import java.net.HttpURLConnection; // NEU: Import für HTTP-Verbindung
+import java.net.URL; // NEU: Import für URL
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -418,6 +421,37 @@ public class AlarmService extends Service {
         if (mCurrentAlarm.mFlash) {
             mHandler.post(mFlashRunnable);
         }
+
+        // NEUER TEIL: Webhook auslösen
+        String webhookUrl = mPrefs.getString(PreferencesKeys.KEY_WEBHOOK_URL, "");
+
+        if (!webhookUrl.isEmpty()) {
+            // Führe den Netzwerkaufruf in einem Hintergrund-Thread aus
+            // Wichtig: Netzwerkoperationen müssen in einem separaten Thread ausgeführt werden
+            new Thread(() -> {
+                try {
+                    LogUtils.i("Triggering webhook: " + webhookUrl);
+                    URL url = new URL(webhookUrl);
+                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    try {
+                        // Setze Timeouts, um eine endlose Blockade zu verhindern
+                        urlConnection.setConnectTimeout(5000); 
+                        urlConnection.setReadTimeout(5000);
+                        
+                        // Führt den GET Request aus
+                        int responseCode = urlConnection.getResponseCode();
+                        LogUtils.v("Webhook triggered successfully, response code: " + responseCode);
+                    } finally {
+                        urlConnection.disconnect();
+                    }
+                } catch (Exception e) {
+                    // Loggen Sie Fehler, falls der Webhook fehlschlägt
+                    LogUtils.e("Failed to trigger webhook: " + webhookUrl, e);
+                }
+            }).start();
+        }
+        // ENDE NEUER TEIL
+
         sendBroadcast(new Intent(ALARM_ALERT_ACTION));
         attachListeners();
     }
