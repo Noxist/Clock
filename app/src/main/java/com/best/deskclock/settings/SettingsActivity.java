@@ -5,12 +5,7 @@
  */
 
 package com.best.deskclock.settings;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.EditTextPreference;
-import android.widget.Toast;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
 import static com.best.deskclock.settings.PermissionsManagementActivity.PermissionsManagementFragment.areEssentialPermissionsNotGranted;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_SETTINGS;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_BACKUP_RESTORE_PREFERENCES;
@@ -40,7 +35,9 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
 
 import com.best.deskclock.R;
 import com.best.deskclock.data.DataModel;
@@ -58,6 +55,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 
 /**
@@ -276,23 +275,68 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mPermissionMessage.setVisible(areEssentialPermissionsNotGranted(requireContext()));
 
             mInterfaceCustomizationPref.setOnPreferenceClickListener(this);
-
             mClockSettingsPref.setOnPreferenceClickListener(this);
-
             mAlarmSettingsPref.setOnPreferenceClickListener(this);
-
             mTimerSettingsPref.setOnPreferenceClickListener(this);
-
             mStopwatchSettingsPref.setOnPreferenceClickListener(this);
-
             mScreensaverSettings.setOnPreferenceClickListener(this);
-
             mWidgetsSettings.setOnPreferenceClickListener(this);
-
             mPermissionsManagement.setOnPreferenceClickListener(this);
-
             mBackupRestorePref.setOnPreferenceClickListener(this);
+
+            // --- START: NEUER WEBHOOK CODE ---
+            // Findet den Test-Button, den wir in settings.xml angelegt haben
+            Preference testWebhook = findPreference("test_webhook");
+            if (testWebhook != null) {
+                testWebhook.setOnPreferenceClickListener(pref -> {
+                    // Findet das Textfeld mit der URL
+                    EditTextPreference urlPref = findPreference("webhook_url");
+                    if (urlPref != null && urlPref.getText() != null && !urlPref.getText().isEmpty()) {
+                        // Führt den Test aus
+                        triggerWebhook(urlPref.getText());
+                    } else {
+                        Toast.makeText(requireContext(), "Bitte erst eine URL eingeben", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                });
+            }
+            // --- ENDE: NEUER WEBHOOK CODE ---
         }
+
+        // --- START: WEBHOOK HELPER METHODE ---
+        private void triggerWebhook(final String urlString) {
+            new Thread(() -> {
+                try {
+                    URL url = new URL(urlString);
+                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setRequestMethod("POST");
+                    urlConnection.setConnectTimeout(5000);
+                    urlConnection.connect();
+
+                    int responseCode = urlConnection.getResponseCode();
+
+                    // UI Feedback im Main Thread geben
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            if (responseCode >= 200 && responseCode < 300) {
+                                Toast.makeText(getContext(), R.string.webhook_success, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getContext(), getContext().getString(R.string.webhook_failed) + " Code: " + responseCode, Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                    urlConnection.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() ->
+                            Toast.makeText(getContext(), R.string.webhook_failed, Toast.LENGTH_SHORT).show()
+                        );
+                    }
+                }
+            }).start();
+        }
+        // --- ENDE: WEBHOOK HELPER METHODE ---
 
         private void displayWarningIfEssentialPermissionAreNotGranted() {
             if (areEssentialPermissionsNotGranted(requireContext())) {
@@ -343,5 +387,4 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
                     Toast.LENGTH_SHORT).show();
         }
     }
-
 }
