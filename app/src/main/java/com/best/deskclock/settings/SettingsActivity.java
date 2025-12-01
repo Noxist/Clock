@@ -5,7 +5,12 @@
  */
 
 package com.best.deskclock.settings;
-
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.EditTextPreference;
+import android.widget.Toast;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import static com.best.deskclock.settings.PermissionsManagementActivity.PermissionsManagementFragment.areEssentialPermissionsNotGranted;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_SETTINGS;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_BACKUP_RESTORE_PREFERENCES;
